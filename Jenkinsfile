@@ -33,9 +33,9 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'npm start &'
+                sh './jenkins/scripts/deliver.sh'
                 sleep 60
-                sh 'pkill -f "node"'
+                sh './jenkins/scripts/kill.sh'
             }
         }
     }
