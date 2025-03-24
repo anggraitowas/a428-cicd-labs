@@ -11,17 +11,33 @@ pipeline {
                 sh 'npm install'
             }
         }
-        stage('Test') {
+        stage('Test') { 
             steps {
-                sh './jenkins/scripts/test.sh'
+                sh './jenkins/scripts/test.sh' 
             }
         }
-        stage('Deploy') { 
+        stage('Manual Approval') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
-                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)' 
-                sh './jenkins/scripts/kill.sh' 
+                script {
+                    def userInput = input(
+                        message: 'Lanjutkan ke tahap Deploy?',
+                        parameters: [
+                            choice(name: 'Pilihan', choices: ['Proceed', 'Abort'], description: 'Pilih apakah akan melanjutkan ke tahap Deploy atau tidak.')
+                        ]
+                    )
+                    if (userInput == 'Abort') {
+                        error("Pipeline dihentikan oleh pengguna.")
+                    }
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'npm start &'
+                sleep 60
+                sh 'pkill -f "node"'
             }
         }
     }
 }
+
